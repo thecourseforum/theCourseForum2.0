@@ -43,30 +43,30 @@
                 <!-- Review Ratings -->
                 <div class="review-ratings d-flex justify-content-between align-items-end flex-wrap">
                     <div class="d-flex">
-                        <div>
+                        <div data-toggle="tooltip" data-placement="bottom" title="Overall Rating">
                             <strong>
                                 <p id="review-average">
                                     <i class="fa fa-star fa-fw"></i> {{ review.average|floatformat:2 }}
                                 </p>
                             </strong>
                         </div>
-                        <div class="ml-4 text-muted">
+                        <div class="ml-4 text-muted" data-toggle="tooltip" data-placement="bottom" title="Instructor Rating">
                             <i class="fa fa-user"></i>
                             {{ review.instructor_rating }}
                         </div>
-                        <div class="ml-4 text-muted">
+                        <div class="ml-4 text-muted" data-toggle="tooltip" data-placement="bottom" title="Enjoyability">
                             <i class="far fa-smile-beam"></i>
                             {{ review.enjoyability }}
                         </div>
-                        <div class="ml-4 text-muted">
+                        <div class="ml-4 text-muted" data-toggle="tooltip" data-placement="bottom" title="Difficulty">
                             <i class="fa fa-dumbbell fa-fw"></i>
                             {{ review.difficulty }}
                         </div>
-                        <div class="ml-4 text-muted">
+                        <div class="ml-4 text-muted" data-toggle="tooltip" data-placement="bottom" title="Recommdendability">
                             <i class="fas fa-thumbs-up"></i>
                             {{ review.recommendability }}
                         </div>
-                        <div class="ml-4 text-muted">
+                        <div class="ml-4 text-muted" data-toggle="tooltip" data-placement="bottom" title="Estimated Hours/Week">
                             <i class="fa fa-hourglass-half fa-fw"></i>
                             {{ review.hours_per_week }}
                         </div>
