@@ -5,7 +5,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser
-from django.utils import timezone
 
 
 class School(models.Model):
@@ -474,7 +473,7 @@ class CourseGrade(models.Model):
     d = models.IntegerField(default=0)
     d_minus = models.IntegerField(default=0)
     f = models.IntegerField(default=0)
-    ot = models.IntegerField(default=0)
+    ot = models.IntegerField(default=0)  # other/pass
     drop = models.IntegerField(default=0)
     withdraw = models.IntegerField(default=0)
     total_enrolled = models.IntegerField(default=0)
@@ -513,7 +512,7 @@ class CourseInstructorGrade(models.Model):
     d = models.IntegerField(default=0)
     d_minus = models.IntegerField(default=0)
     f = models.IntegerField(default=0)
-    ot = models.IntegerField(default=0)
+    ot = models.IntegerField(default=0)  # other/pass
     drop = models.IntegerField(default=0)
     withdraw = models.IntegerField(default=0)
     total_enrolled = models.IntegerField(default=0)
@@ -627,9 +626,9 @@ class Review(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(20)])
 
     # Review created date. Required.
-    created = models.DateTimeField(editable=False, default=timezone.now)
+    created = models.DateTimeField(auto_now_add=True)
     # Review modified date. Required.
-    modified = models.DateTimeField(default=timezone.now)
+    modified = models.DateTimeField(auto_now=True)
 
     # does this get used anywhere? not sure
     def average(self):
@@ -699,11 +698,11 @@ class Review(models.Model):
         )
 
     @staticmethod
-    def display_reviews(course, instructor, user):
+    def display_reviews(course_id, instructor_id, user):
         """Prepare review list for course-instructor page."""
         reviews = Review.objects.filter(
-            instructor=instructor,
-            course=course,
+            instructor=instructor_id,
+            course=course_id,
         ).exclude(text="").annotate(
             sum_votes=models.functions.Coalesce(
                 models.Sum('vote__value'),
