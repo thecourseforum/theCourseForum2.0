@@ -9,9 +9,6 @@ __pycache__/*
 *.db
 *.sql
 !db/*.sql
-# Migration files
-tcf_website/migrations/*
-!tcf_website/migrations/__init__.py
 # Environment variables
 .env*
 !.config/.env.example
@@ -28,3 +25,5 @@ db/*.csv
 .coverage
 # ESLint cache
 .eslintcache
+# Logging text files
+*.txt
