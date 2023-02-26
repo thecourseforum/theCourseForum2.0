@@ -29,7 +29,7 @@ class Department(models.Model):
     """Department model.
 
     Belongs to a School.
-    Has many Subdepartments.
+    Has many Subjects.
     Has many Instructors.
     """
     # Department name. Required.
@@ -61,17 +61,15 @@ class Department(models.Model):
 # e.g. CREO in French department or ENCW in English
 
 
-class Subdepartment(models.Model):
-    """Subdepartment model.
+class Subject(models.Model):
+    """Subject model.
 
     Belongs to a Department.
     Has many Courses.
     """
-    # Subdepartment name. Required.
+    # Subject name. Required.
     name = models.CharField(max_length=255)
-    # Subdepartment description. Optional.
-    description = models.TextField(blank=True)
-    # Subdepartment mnemonic. Required.
+    # Subject mnemonic. Required.
     mnemonic = models.CharField(max_length=255, unique=True)
 
     # Department foreign key. Required.
@@ -88,7 +86,7 @@ class Subdepartment(models.Model):
             5).order_by("number")
 
     def has_current_course(self):
-        """Return True if subdepartment has a course in current semester."""
+        """Return True if subject has a course in current semester."""
         return self.course_set.filter(
             section__semester=Semester.latest()).exists()
 
@@ -100,7 +98,7 @@ class Subdepartment(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['mnemonic', 'department'],
-                name='unique subdepartment mnemonics per department'
+                name='unique subject mnemonics per department'
             )
         ]
 
@@ -161,7 +159,7 @@ class Instructor(models.Model):
     # Instructor departments. Optional.
     departments = models.ManyToManyField(Department)
     # hidden professor. Required. Default visible.
-    hidden= models.BooleanField(default=False)
+    hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
@@ -359,7 +357,7 @@ class Semester(models.Model):
 class Course(models.Model):
     """Course model.
 
-    Belongs to a Subdepartment.
+    Belongs to a Subject.
     Has many Sections.
     Has a Semester last taught.
     """
@@ -371,15 +369,19 @@ class Course(models.Model):
     # Course number. Required.
     number = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(99999)])
+    # ID used in SIS. Required.
+    # TODO: make this not nullable
+    sis_id = models.IntegerField(validators=[MinValueValidator(0)], null=True)
 
-    # Subdepartment foreign key. Required.
-    subdepartment = models.ForeignKey(Subdepartment, on_delete=models.CASCADE)
+    # Subject foreign key. Required.
+    # TODO: make this not nullable
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=True)
     # Semester that the course was most recently taught.
     semester_last_taught = models.ForeignKey(
         Semester, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.subdepartment.mnemonic} {self.number} | {self.title}"
+        return f"{self.subject.mnemonic} {self.number} | {self.title}"
 
     def compute_pre_req(self):
         """Returns course pre-requisite(s)."""
@@ -419,12 +421,12 @@ class Course(models.Model):
 
     def code(self):
         """Returns the courses code string."""
-        return f"{self.subdepartment.mnemonic} {self.number}"
+        return f"{self.subject.mnemonic} {self.number}"
 
     def eval_link(self):
         """Returns link to student eval page for that class"""
         link = f"https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp=" \
-               f"{self.subdepartment.mnemonic},{self.number}"
+               f"{self.subject.mnemonic},{self.number}"
         return link
 
     def is_recent(self):
@@ -462,13 +464,13 @@ class Course(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['subdepartment', 'number']),
+            models.Index(fields=['subject', 'number']),
         ]
 
         constraints = [
             models.UniqueConstraint(
-                fields=['subdepartment', 'number'],
-                name='unique course subdepartment and number'
+                fields=['subject', 'number'],
+                name='unique course subject and number'
             )
         ]
 
@@ -489,7 +491,7 @@ class CourseGrade(models.Model):
     total_enrolled = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.course.subdepartment.mnemonic} {self.course.number} {self.average}"
+        return f"{self.course.subject.mnemonic} {self.course.number} {self.average}"
 
 
 class CourseInstructorGrade(models.Model):
@@ -511,7 +513,7 @@ class CourseInstructorGrade(models.Model):
 
     def __str__(self):
         return (f"{self.instructor.first_name} {self.instructor.last_name} "
-                f"{self.course.subdepartment.mnemonic} {self.course.number} {self.average}")
+                f"{self.course.subject.mnemonic} {self.course.number} {self.average}")
 
 
 class Section(models.Model):

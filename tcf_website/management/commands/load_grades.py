@@ -33,9 +33,9 @@ class Command(BaseCommand):
 
         # Dict mapping course mnemonic in a tuple to its ID in our database
         self.courses = {
-            (obj['subdepartment__mnemonic'], obj['number']): obj['id']
+            (obj['subject__mnemonic'], obj['number']): obj['id']
             for obj in Course.objects.values('id', 'number',
-                                             'subdepartment__mnemonic')
+                                             'subject__mnemonic')
         }
 
         # Location of our grade data CSVs
@@ -149,7 +149,7 @@ class Command(BaseCommand):
         # 'Term Desc' column is unused because we only care about aggregate across semesters
         # Might want to display semester-by-semester metrics too? Would have to change this
 
-        subdepartment = row['Subject']
+        subject = row['Subject']
         # `Catalog Number` is handled with all other numerical data in the try block below
 
         title = row['Class Title']
@@ -189,9 +189,9 @@ class Command(BaseCommand):
             raise e
         # No error casting values to float/int, so continue
         # Identifiers are tuple keys to grade data dictionaries
-        course_identifier = (subdepartment, number, title)
+        course_identifier = (subject, number, title)
         course_instructor_identifier = (
-            subdepartment, number, first_name, last_name)
+            subject, number, first_name, last_name)
 
         # Dictionary values (incremented onto value if key already exists)
         this_semesters_grades = [a_plus, a, a_minus,
