@@ -13,6 +13,7 @@ router.register(r"courses", views.CourseViewSet)
 router.register(r"instructors", views.InstructorViewSet)
 router.register(r"semesters", views.SemesterViewSet)
 
+
 urlpatterns = [
     path("", include(router.urls)),
 ]

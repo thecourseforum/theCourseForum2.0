@@ -12,6 +12,7 @@ from django.db.models.functions import Concat
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from .recommender import get_recommendations_helper
 
 from ..models import (
     Answer,
@@ -199,6 +200,20 @@ def course_view(request, mnemonic, course_number):
     request.session["course_title"] = course.title
     request.session["instructor_fullname"] = None
 
+    rec_ratings = []
+    rec_gpas = []
+    rec_difficulty = []
+    recommendations = get_recommendations_helper(course.title, mnemonic, course.number)
+    if(len(recommendations) > 0):
+        for i in range(len(recommendations[0])):
+            temp_rec_number = recommendations[2][i]
+            temp_rec_mnemonic = recommendations[1][i]
+            temp_course = get_object_or_404(
+                Course, subdepartment__mnemonic=temp_rec_mnemonic.upper(), number=temp_rec_number
+                )
+            rec_ratings.append(temp_course.average_rating())
+            rec_difficulty.append(temp_course.average_difficulty())
+
     return render(
         request,
         "course/course.html",
@@ -208,6 +223,12 @@ def course_view(request, mnemonic, course_number):
             "latest_semester": latest_semester,
             "breadcrumbs": breadcrumbs,
             "taught_this_semester": taught_this_semester,
+            'recommendation_names': recommendations[0] if len(recommendations) > 0 else [],
+            'recommendation_mnemonics':recommendations[1] if len(recommendations) > 0 else [],
+            'recommendation_numbers':recommendations[2] if len(recommendations) > 0 else [],
+            'recommendation_gpas': rec_gpas,
+            'recommendation_difficulty': rec_difficulty,
+            'recommendation_rec_ratings': rec_ratings
         },
     )
 

@@ -21,10 +21,18 @@
         </div>
 
         <div class="instructors container-lg mt-3">
-            <div class="d-md-flex align-items-baseline my-3">
-                <h1 class="mr-md-3 text-nowrap">{{ course.code }}</h1>
-                <h2>{{ course.title }}</h2>
+            <div class="d-md-flex justify-content-between align-items-baseline my-3">
+                <div class="text-left">
+                    <h1 class="mr-md-3 text-nowrap">{{ course.code }}</h1>
+                    <h2>{{ course.title }}</h2>
+                </div>
+                <div class="text-right">
+                    {% if recommendation_names %}
+                    <button onclick="scrollToHeader()" class="btn btn-secondary">Related Courses</button>
+                    {% endif %}
+                </div>
             </div>
+            
 
             <!-- Course Description -->
             {% if course.description|length > 0 %}
@@ -52,7 +60,9 @@
 
             <br/>
 
+            <!-- Page content -->
             {% if not taught_this_semester %}
+                <br/>
                 <div class="new card col p-5 text-center">
                     <div class="card-body">
                         <h4 class="card-title">
@@ -65,7 +75,9 @@
                 </div>
             {% endif %}
 
+
             <ul class="instructor-list course-list">
+                <br/>
                 {% for i in instructors %}
                     <li class="instructor {% if i.semester_last_taught != latest_semester %}old{% endif %}">
                         {% url 'course_instructor' course_id=course.pk instructor_id=i.pk as link %}
@@ -73,9 +85,37 @@
                     </li>
                 {% endfor %}
             </ul>
+            
+            <br/>
+            <div> 
+                {% if recommendation_names %}
+                <h2 id = "related-courses"> Related Courses: </h2>
+                {% load custom_filters %}
+                <div id="gridContent" class="grid-content">
+                    <br>
+                    <div class="row justify-content-center">
+                        {% for i in recommendation_names %}
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{recommendation_mnemonics|get_item:forloop.counter0}} {{recommendation_numbers|get_item:forloop.counter0}}: {{ i }}</h5>
+                                    <p class="card-text">Difficulty: {{ recommendation_difficulty|get_item:forloop.counter0|floatformat:"2" }}</br>
+                                    Rating: {{ recommendation_rec_ratings|get_item:forloop.counter0|floatformat:"2" }}</p>
+                                    <a href="{% url 'course' mnemonic=recommendation_mnemonics|get_item:forloop.counter0 course_number=recommendation_numbers|get_item:forloop.counter0 %}" class="btn btn-primary">View Course</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
         </div>
     </div>
-{% endblock %}
+
+    {% endblock %}
+
 
 {% block js %}
     <script type="module" src="{% static 'common/bind-show-hide.js' %}"></script>
@@ -87,4 +127,15 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
+
+    <!-- Dropdown toggle -->
+    <script>
+        function scrollToHeader() {
+            const header = document.getElementById('related-courses');
+            header.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
 {% endblock %}
+
+
+
